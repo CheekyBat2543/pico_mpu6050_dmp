@@ -1,6 +1,7 @@
 # RP Pico MPU6050 Driver Library
 
 RP Pico port of Invensense's MPU driver
+This library port is still a work in progress and interrupt related functionalities are still not tested
 
 # How To Add to Your Project:
 
