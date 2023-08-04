@@ -1437,6 +1437,72 @@ float qToFloat(long number, unsigned char q) {
 }
 
 /**
+ * @brief               Convert sensor data received from dmp fifo to real units.
+ * Unit conversions are:
+ * \n Gyroscope     ==> DPS
+ * \n Accelerometer ==> m/s^2
+ * \n Quaternions   ==> Euler Angles in degrees \n
+ * @e sensors bitmask can have the combinations below:
+ * \n INV_X_GYRO
+ * \n INV_Y_GYRO
+ * \n INV_Z_GYRO
+ * \n INV_XYZ_GYRO
+ * \n INV_XYZ_ACCEL
+ * \n INV_WXYZ_QUAT
+ * 
+ * @param[out] data     MPU data struct that will hold the converted units.
+ * @param[in] gyro      Gyroscope data in hardware units.
+ * @param[in] accel     Accelerometer data in hardware units.
+ * @param[in] quat      Quaternion data in hardware units (Q30 Format).
+ * @param[in] sensors   Sensor bitmask that selects which sensor datas are converted.
+ * @return              Sensor bitmask if any data is converted, 0 if no data is converted.
+ */
+int dmp_convert_sensor_data_real_units(mpu_data_f * data, short * gyro, short * accel, long * quat, short sensors) {
+    float gyro_sens = 0;
+    unsigned short accel_sens = 0;
+    mpu_get_gyro_sens(&gyro_sens);
+    mpu_get_accel_sens(&accel_sens);
+    if(sensors == 0) {
+        return 0;
+    }
+    if(sensors & INV_X_GYRO) {
+        data->gyro_x_f = (float)(gyro[0] / gyro_sens);
+    }
+    if(sensors & INV_Y_GYRO) {
+        data->gyro_y_f = (float)(gyro[1] / gyro_sens);
+    }
+    if(sensors & INV_Z_GYRO) {
+        data->gyro_z_f = (float)(gyro[2] / gyro_sens);
+    }
+    if(sensors & INV_XYZ_ACCEL) {
+        data->accel_x_f = (float)(9.80665f*accel[0]) / accel_sens;
+        data->accel_y_f = (float)(9.80665f*accel[1]) / accel_sens;
+        data->accel_z_f = (float)(9.80665f*accel[2]) / accel_sens;        
+    }
+    if(sensors & INV_WXYZ_QUAT) {
+        data->quat_w_f = qToFloat(quat[0], 30);
+        data->quat_x_f = qToFloat(quat[1], 30);
+        data->quat_y_f = qToFloat(quat[2], 30);
+        data->quat_z_f = qToFloat(quat[3], 30);
+        // Roll (x-axis)
+        float sinr_cosp = +2.0 * (data->quat_w_f * data->quat_x_f + data->quat_y_f * data->quat_z_f);
+        float cosr_cosp = +1.0 - 2.0 * (data->quat_x_f * data->quat_x_f + data->quat_y_f * data->quat_y_f);
+        data->roll = atan2f(sinr_cosp, cosr_cosp) * 57.2958f;
+        // Pitch (y-axis)
+        float sinp = sqrtf((float)(1.0 + 2.0 * (data->quat_w_f * data->quat_y_f - data->quat_x_f * data->quat_z_f)));
+        float cosp = sqrtf((float)(1.0 - 2.0 * (data->quat_w_f * data->quat_y_f - data->quat_x_f * data->quat_z_f)));
+        data->pitch = (float)(2.0 * atan2f(sinp, cosp) - (float)3.14f / 2.0) * 57.2958f;            
+        // Yawn (z-axis)
+        float siny_cosp = 2.0 * (data->quat_w_f * data->quat_z_f + data->quat_x_f * data->quat_y_f);
+        float cosy_cosp = 1.0 - 2.0 * (data->quat_y_f * data->quat_y_f + data->quat_z_f * data->quat_z_f);
+        data->yaw = atan2f(siny_cosp, cosy_cosp) * 57.2958f;
+    }
+    return sensors;
+}
+
+
+
+/**
  *  @}
  */
 

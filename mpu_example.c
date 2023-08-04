@@ -115,39 +115,10 @@ int main() {
         unsigned char more = 0;
         dmp_read_fifo(gyro, accel, quat, &timestamp, &sensors, &more);
         if(sensors & (INV_XYZ_ACCEL | INV_XYZ_GYRO | INV_WXYZ_QUAT)) {
-
-            mpu_data.gyro_x_f = (float)(gyro[0] / gyro_sens);
-            mpu_data.gyro_y_f = (float)(gyro[1] / gyro_sens);
-            mpu_data.gyro_z_f = (float)(gyro[2] / gyro_sens);
+            dmp_convert_sensor_data_real_units(&mpu_data, gyro, accel, quat, sensors);
             printf("\nGyro          ==> x: %6.2f, y: %6.2f, z: %6.2f\n", mpu_data.gyro_x_f, mpu_data.gyro_y_f, mpu_data.gyro_z_f);
-
-            mpu_data.accel_x_f = (float)(GRAVITY_ACCEL*accel[0]) / accel_sens ;
-            mpu_data.accel_y_f = (float)(GRAVITY_ACCEL*accel[1]) / accel_sens ;
-            mpu_data.accel_z_f = (float)(GRAVITY_ACCEL*accel[2]) / accel_sens ;
             printf("Accelerometer ==> x: %6.2f, y: %6.2f, z: %6.2f\n", mpu_data.accel_x_f, mpu_data.accel_y_f, mpu_data.accel_z_f);
-            /* Normalize the quaternion values by converting them to floats from Q30 format */
-            mpu_data.quat_w_f = qToFloat(quat[0], 30);
-            mpu_data.quat_x_f = qToFloat(quat[1], 30);
-            mpu_data.quat_y_f = qToFloat(quat[2], 30);
-            mpu_data.quat_z_f = qToFloat(quat[3], 30);
             printf("Quaternions   ==> w: %6.2f, x: %6.2f, y: %6.2f, z: %6.2f\n", mpu_data.quat_w_f, mpu_data.quat_x_f, mpu_data.quat_y_f, mpu_data.quat_z_f);
-            // Roll (x-axis)
-            float sinr_cosp = +2.0 * (mpu_data.quat_w_f * mpu_data.quat_x_f + mpu_data.quat_y_f * mpu_data.quat_z_f);
-            float cosr_cosp = +1.0 - 2.0 * (mpu_data.quat_x_f * mpu_data.quat_x_f + mpu_data.quat_y_f * mpu_data.quat_y_f);
-            mpu_data.roll = atan2f(sinr_cosp, cosr_cosp);
-            // Pitch (y-axis)
-            float sinp = sqrtf((float)(1.0 + 2.0 * (mpu_data.quat_w_f * mpu_data.quat_y_f - mpu_data.quat_x_f * mpu_data.quat_z_f)));
-            float cosp = sqrtf((float)(1.0 - 2.0 * (mpu_data.quat_w_f * mpu_data.quat_y_f - mpu_data.quat_x_f * mpu_data.quat_z_f)));
-            mpu_data.pitch = (float)(2.0 * atan2f(sinp, cosp) - (float)3.14f / 2.0);            
-            // Yawn (z-axis)
-            float siny_cosp = 2.0 * (mpu_data.quat_w_f * mpu_data.quat_z_f + mpu_data.quat_x_f * mpu_data.quat_y_f);
-            float cosy_cosp = 1.0 - 2.0 * (mpu_data.quat_y_f * mpu_data.quat_y_f + mpu_data.quat_z_f * mpu_data.quat_z_f);
-            mpu_data.yaw = atan2f(siny_cosp, cosy_cosp);
-
-            // Radians to angles
-            mpu_data.roll *= 57.2958f;
-            mpu_data.yaw *= 57.2958f;
-            mpu_data.pitch *= 57.2958f;
             printf("Angles        ==> Roll: %5.1f, Pitch: %5.1f, Yaw: %5.1f\n", mpu_data.roll, mpu_data.pitch, mpu_data.yaw);
         } else {
             printf("No new data from fifo\n");

@@ -96,5 +96,8 @@ int dmp_read_fifo(short *gyro, short *accel, long *quat,
 /* Function to arse quaternion data */
 float qToFloat(long number, unsigned char q);
 
+int dmp_convert_sensor_data_real_units(mpu_data_f * data, short * gyro, short * accel, long * quat, short sensors);
+
+
 #endif  /* #ifndef _INV_MPU_DMP_MOTION_DRIVER_H_ */
 
