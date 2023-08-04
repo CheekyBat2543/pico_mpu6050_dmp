@@ -1,1 +1,8 @@
+.vscode
 build
+libraries/eMPL-hal
+libraries/include
+libraries/mllite
+libraries/eMD.hpp.in
+libraries/module.lb
+libraries/mpl

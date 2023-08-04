@@ -1,26 +1,28 @@
 {
-    // These settings tweaks to the cmake plugin will ensure
-    // that you debug using cortex-debug instead of trying to launch
-    // a Pico binary on the host
-    "cmake.statusbar.advanced": {
-        "debug": {
-            "visibility": "hidden"
-        },
-        "launch": {
-            "visibility": "hidden"
-        },
-        "build": {
-            "visibility": "hidden"
-        },
-        "buildTarget": {
-            "visibility": "hidden"
-        }
-    },
-    "cmake.buildBeforeRun": true,
-    "cmake.configureOnOpen": true,
-    "cmake.configureSettings": {
-      "CMAKE_MODULE_PATH": "${env:PICO_INSTALL_PATH}/pico-sdk-tools"
-    },
-    "cmake.generator": "Ninja",
-    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
+    "files.associations": {
+        "inv_mpu6050.h": "c",
+        "inv_mpu_dmp_motion_driver.h": "c",
+        "stdlib.h": "c",
+        "double.h": "c",
+        "cctype": "c",
+        "cmath": "c",
+        "compare": "c",
+        "concepts": "c",
+        "cstdarg": "c",
+        "cstdio": "c",
+        "cstdlib": "c",
+        "exception": "c",
+        "type_traits": "c",
+        "limits": "c",
+        "new": "c",
+        "*.tcc": "c",
+        "cinttypes": "c",
+        "cstdint": "c",
+        "typeinfo": "c",
+        "math.h": "c",
+        "pico.h": "c",
+        "sf_table.h": "c",
+        "float.h": "c",
+        "stdio.h": "c"
+    }
 }
